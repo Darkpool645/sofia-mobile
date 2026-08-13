@@ -1,4 +1,5 @@
 import 'package:go_router/go_router.dart';
+import 'package:sofia/screens/admin/groups_screen.dart';
 import '../providers/auth_provider.dart';
 import '../screens/login_screen.dart';
 import 'package:flutter/material.dart';
@@ -39,6 +40,7 @@ GoRouter buildRouter(AuthProvider auth) {
       GoRoute(path: '/admin', builder: (_, __) => const AdminHome()),
       GoRoute(path: '/profesor', builder: (_, __) => const ProfesorHome()),
       GoRoute(path: '/padre', builder: (_, __) => const PadreHome()),
+      GoRoute(path: '/admin/groups', builder: (_, __) => const GroupsScreen())
     ],
   );
 }

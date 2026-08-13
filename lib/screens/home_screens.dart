@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import '../providers/auth_provider.dart';
+import 'package:go_router/go_router.dart';
 import '../theme.dart';
 
 class _RoleHome extends StatelessWidget {
@@ -73,21 +74,32 @@ class _RoleHome extends StatelessWidget {
   }
 }
 
-Widget _placeholderCard(String title, IconData icon) {
-  return Container(
-    margin: const EdgeInsets.only(bottom: 12),
-    padding: const EdgeInsets.all(16),
-    decoration: BoxDecoration(
+Widget _placeholderCard(String title, IconData icon, {VoidCallback? onTap}) {
+  return Padding(
+    padding: const EdgeInsets.only(bottom: 12),
+    child: Material(
       color: Colors.white,
       borderRadius: BorderRadius.circular(14),
-      border: Border.all(color: const Color(0xFFECEAE3)),
-    ),
-    child: Row(
-      children: [
-        Icon(icon, color: SofiaColors.brand),
-        const SizedBox(width: 12),
-        Text(title, style: const TextStyle(fontWeight: FontWeight.w600, color: SofiaColors.ink)),
-      ],
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(14),
+        child: Container(
+          padding: const EdgeInsets.all(16),
+          decoration: BoxDecoration(
+            borderRadius: BorderRadius.circular(14),
+            border: Border.all(color: const Color(0xFFECEAE3)),
+          ),
+          child: Row(
+            children: [
+              Icon(icon, color: SofiaColors.brand),
+              const SizedBox(width: 12),
+              Text(title,
+                  style: const TextStyle(
+                      fontWeight: FontWeight.w600, color: SofiaColors.ink)),
+            ],
+          ),
+        ),
+      ),
     ),
   );
 }
@@ -95,17 +107,21 @@ Widget _placeholderCard(String title, IconData icon) {
 
 
 class AdminHome extends StatelessWidget {
-  const AdminHome({ super.key });
+  const AdminHome({super.key});
   @override
   Widget build(BuildContext context) => _RoleHome(
-    roleLabel : 'ADMINISTRADOR',
-    accent: SofiaColors.brand,
-    children: [
-      _placeholderCard('Usuarios (profesores y padres)', Icons.group_outlined),
-      _placeholderCard('Grupo y alumnos', Icons.grid_view_outlined),
-      _placeholderCard('Ciclos escolares', Icons.calendar_month_outlined),
-    ],
-  );
+        roleLabel: 'ADMINISTRADOR',
+        accent: SofiaColors.brand,
+        children: [
+          _placeholderCard('Usuarios (profesores y padres)', Icons.group_outlined),
+          _placeholderCard(
+            'Grupos y alumnos',
+            Icons.grid_view_outlined,
+            onTap: () => context.push('/admin/groups'),   // ← navega
+          ),
+          _placeholderCard('Ciclos escolares', Icons.calendar_month_outlined),
+        ],
+      );
 }
 
 class ProfesorHome extends StatelessWidget {

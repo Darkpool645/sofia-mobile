@@ -16,7 +16,7 @@ class GroupsService {
     required String endDate,
     bool active = true,
   }) async {
-    final data = await _api.post('/schoool-years', {
+    final data = await _api.post('/school-years', {
       'name': name,
       'startDate': startDate,
       'endDate': endDate,
@@ -27,7 +27,7 @@ class GroupsService {
 
   Future<List<Group>> getGroups() async {
     final data = await _api.get('/groups') as List;
-    return data.map((e) => Group.formJson(e as Map<String, dynamic>)).toList();
+    return data.map((e) => Group.fromJson(e as Map<String, dynamic>)).toList();
   }
 
   Future<Group> createGroup({
@@ -38,6 +38,6 @@ class GroupsService {
       'name': name,
       'schoolYearId': schoolYearId,
     }) as Map<String, dynamic>;
-    return Group.formJson(data);
+    return Group.fromJson(data);
   }
 }

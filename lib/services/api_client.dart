@@ -2,7 +2,7 @@ import 'dart:convert';
 import 'package:http/http.dart' as http;
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../config/api_config.dart';
-import 'auth_service.dart'; 
+import 'auth_service.dart';
 
 class ApiClient {
   final _storage = const FlutterSecureStorage();
@@ -17,17 +17,25 @@ class ApiClient {
     };
   }
 
-  Future<dynamic> get(String path) => _send(() async =>
-      http.get(Uri.parse('${ApiConfig.baseUrl}$path'), headers: await _headers()));
+  Future<dynamic> get(String path) => _send(
+    () async => http.get(
+      Uri.parse('${ApiConfig.baseUrl}$path'),
+      headers: await _headers(),
+    ),
+  );
 
-  Future<dynamic> post(String path, Map<String, dynamic> body) => _send(() async =>
-      http.post(Uri.parse('${ApiConfig.baseUrl}$path'),
-          headers: await _headers(), body: jsonEncode(body)));
+  Future<dynamic> post(String path, Map<String, dynamic> body) => _send(
+    () async => http.post(
+      Uri.parse('${ApiConfig.baseUrl}$path'),
+      headers: await _headers(),
+      body: jsonEncode(body),
+    ),
+  );
 
   Future<dynamic> _send(Future<http.Response> Function() request) async {
     final http.Response res;
     try {
-      res = await request().timeout(const Duration(seconds: 20));
+      res = await request().timeout(const Duration(seconds: 60));
     } catch (_) {
       throw ApiException('No se pudo conectar con el servidor.', 0);
     }

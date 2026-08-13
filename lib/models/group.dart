@@ -11,10 +11,19 @@ class Group {
     required this.studentCount,
   });
 
-  factory Group.formJson(Map<String, dynamic> json) => Group(
-    id: json['id'] as String,
-    name: json['name'] as String,
-    schoolYearName: (json['schooYear']?['name'] as String),
-    studentCount: (json['_count']?['students'] as int?) ?? 0
-  );
+  factory Group.fromJson(Map<String, dynamic> json) => Group(
+        id: json['id']?.toString() ?? '',
+        name: json['name']?.toString() ?? '',
+        schoolYearName:
+            (json['schoolYear']?['name'])?.toString() ?? 'Sin ciclo',
+        // Conversión segura: no fuerza el cast, convierte cualquier num a int.
+        studentCount: _asInt(json['_count']?['students']),
+      );
+
+  static int _asInt(dynamic value) {
+    if (value is int) return value;
+    if (value is num) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
+  }
 }

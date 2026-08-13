@@ -22,7 +22,13 @@ class _GroupsScreenState extends State<GroupsScreen> {
     _future = _service.getGroups();
   }
 
-  void _reload() => setState(() => _future = _service.getGroups());
+  Future<void> _reload() async {
+  final future = _service.getGroups();
+  setState(() {
+    _future = future;
+  });
+  await future;
+}
 
   Future<void> _openCreateGroup() async {
     final created = await showModalBottomSheet<bool>(
@@ -39,9 +45,10 @@ class _GroupsScreenState extends State<GroupsScreen> {
     );
 
     if (created == true && mounted) {
-      _reload();
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Grupo creado')));
+      await _reload();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Grupo creado')));
+      }
     }
   }
 
@@ -86,14 +93,14 @@ class _GroupsScreenState extends State<GroupsScreen> {
             );
           }
           return RefreshIndicator(
-            onRefresh: () async => _reload(),
-            child: ListView.separated(
-              padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
-              itemCount: groups.length,
-              separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (_, i) => _GroupCard(group: groups[i]),
-            ),
-          );
+  onRefresh: _reload,
+  child: ListView.separated(
+    padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
+    itemCount: groups.length,
+    separatorBuilder: (_, __) => const SizedBox(height: 10),
+    itemBuilder: (_, i) => _GroupCard(group: groups[i]),
+  ),
+);
         },
       ),
     );

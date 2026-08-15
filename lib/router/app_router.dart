@@ -4,6 +4,7 @@ import '../providers/auth_provider.dart';
 import '../screens/login_screen.dart';
 import 'package:flutter/material.dart';
 import '../screens/home_screens.dart';
+import '../screens/admin/teachers_screen.dart';
 
 /// Mapea cada rol a su pantalla de inicio.
 String homePathForRole(String role) {
@@ -40,7 +41,8 @@ GoRouter buildRouter(AuthProvider auth) {
       GoRoute(path: '/admin', builder: (_, __) => const AdminHome()),
       GoRoute(path: '/profesor', builder: (_, __) => const ProfesorHome()),
       GoRoute(path: '/padre', builder: (_, __) => const PadreHome()),
-      GoRoute(path: '/admin/groups', builder: (_, __) => const GroupsScreen())
+      GoRoute(path: '/admin/groups', builder: (_, __) => const GroupsScreen()),
+      GoRoute(path: '/admin/teachers', builder: (_,__) => const TeachersScreen()),
     ],
   );
 }

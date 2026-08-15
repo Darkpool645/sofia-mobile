@@ -113,7 +113,7 @@ class AdminHome extends StatelessWidget {
         roleLabel: 'ADMINISTRADOR',
         accent: SofiaColors.brand,
         children: [
-          _placeholderCard('Usuarios (profesores y padres)', Icons.group_outlined),
+          _placeholderCard('Usuarios (profesores y padres)', Icons.group_outlined, onTap: () => context.push('/admin/teachers')),
           _placeholderCard(
             'Grupos y alumnos',
             Icons.grid_view_outlined,

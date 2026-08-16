@@ -288,6 +288,59 @@ class _ParentHomeState extends State<ParentHome> {
             Text(item.description!,
                 style: const TextStyle(color: SofiaColors.ink, height: 1.4)),
           ],
+          if (item.hasSubmission) ...[
+            const SizedBox(height: 10),
+            Container(
+              padding: const EdgeInsets.all(10),
+              decoration: BoxDecoration(
+                color: const Color(0xFFF7F6F2),
+                borderRadius: BorderRadius.circular(10),
+              ),
+              child: Row(
+                children: [
+                  Icon(
+                    item.delivered ? Icons.check_circle : Icons.cancel,
+                    size: 18,
+                    color: item.delivered
+                        ? const Color(0xFF2E8C68)
+                        : const Color(0xFFC6503B),
+                  ),
+                  const SizedBox(width: 8),
+                  Text(
+                    item.delivered ? 'Entregó' : 'No entregó',
+                    style: TextStyle(
+                      fontWeight: FontWeight.w700,
+                      fontSize: 13,
+                      color: item.delivered
+                          ? const Color(0xFF2E8C68)
+                          : const Color(0xFFC6503B),
+                    ),
+                  ),
+                  const Spacer(),
+                  if (item.grade != null)
+                    Container(
+                      padding:
+                          const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                      decoration: BoxDecoration(
+                        color: SofiaColors.brand,
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        'Calif. ${item.grade!.toStringAsFixed(1)}',
+                        style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 13),
+                      ),
+                    )
+                  else
+                    const Text('Sin calificar',
+                        style: TextStyle(
+                            color: SofiaColors.soft, fontSize: 12.5)),
+                ],
+              ),
+            ),
+          ],
           const SizedBox(height: 10),
           Row(
             children: [

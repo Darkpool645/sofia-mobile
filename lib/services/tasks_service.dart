@@ -1,4 +1,6 @@
 import 'api_client.dart';
+import '../models/task.dart';
+import '../models/submission.dart';
 
 class TasksService {
   final _api = ApiClient();
@@ -17,5 +19,30 @@ class TasksService {
       'dueDate': dueDate,
       'groupIds': groupIds,
     });
+  }
+
+  Future<List<TeacherTask>> getMyTasks() async {
+    final data = await _api.get('/tasks/mine') as List;
+    return data
+        .map((e) => TeacherTask.fromJson(e as Map<String, dynamic>))
+        .toList();
+  }
+
+  Future<SubmissionRoster> getSubmissions(String taskId) async {
+    final data =
+        await _api.get('/tasks/$taskId/submissions') as Map<String, dynamic>;
+    return SubmissionRoster.fromJson(data);
+  }
+
+  Future<void> saveSubmissions(
+      String taskId, List<SubmissionStudent> students) async {
+    final records = students
+        .map((s) => {
+              'studentId': s.id,
+              'delivered': s.delivered,
+              if (s.gradeValue != null) 'grade': s.gradeValue,
+            })
+        .toList();
+    await _api.post('/tasks/$taskId/submissions', {'records': records});
   }
 }

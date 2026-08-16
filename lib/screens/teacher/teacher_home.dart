@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:sofia/screens/teacher/my_tasks_screen.dart';
 import '../../models/class_slot.dart';
 import '../../models/teacher.dart' show dayNames;
 import '../../services/portal_service.dart';
@@ -65,18 +66,20 @@ class _TeacherHomeState extends State<TeacherHome> {
   Future<void> _openComposer() async {
     final ok = await Navigator.of(context).push<bool>(
       MaterialPageRoute(
-          builder: (_) => CreateTaskScreen(groups: _distinctGroups())),
+        builder: (_) => CreateTaskScreen(groups: _distinctGroups()),
+      ),
     );
     if (ok == true && mounted) {
-      ScaffoldMessenger.of(context)
-          .showSnackBar(const SnackBar(content: Text('Publicación creada')));
+      ScaffoldMessenger.of(
+        context,
+      ).showSnackBar(const SnackBar(content: Text('Publicación creada')));
     }
   }
 
   Future<void> _openAttendance(ClassSlot slot) async {
-    await Navigator.of(context).push(
-      MaterialPageRoute(builder: (_) => AttendanceScreen(slot: slot)),
-    );
+    await Navigator.of(
+      context,
+    ).push(MaterialPageRoute(builder: (_) => AttendanceScreen(slot: slot)));
   }
 
   @override
@@ -105,18 +108,23 @@ class _TeacherHomeState extends State<TeacherHome> {
             return Center(
               child: Padding(
                 padding: const EdgeInsets.all(32),
-                child: Column(mainAxisSize: MainAxisSize.min, children: [
-                  Text(
-                    snap.error is ApiException
-                        ? (snap.error as ApiException).message
-                        : 'No se pudo cargar tu información.',
-                    textAlign: TextAlign.center,
-                    style: const TextStyle(color: SofiaColors.soft),
-                  ),
-                  const SizedBox(height: 16),
-                  OutlinedButton(
-                      onPressed: _reload, child: const Text('Reintentar')),
-                ]),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Text(
+                      snap.error is ApiException
+                          ? (snap.error as ApiException).message
+                          : 'No se pudo cargar tu información.',
+                      textAlign: TextAlign.center,
+                      style: const TextStyle(color: SofiaColors.soft),
+                    ),
+                    const SizedBox(height: 16),
+                    OutlinedButton(
+                      onPressed: _reload,
+                      child: const Text('Reintentar'),
+                    ),
+                  ],
+                ),
               ),
             );
           }
@@ -129,11 +137,14 @@ class _TeacherHomeState extends State<TeacherHome> {
             child: ListView(
               padding: const EdgeInsets.all(16),
               children: [
-                Text('Hola, ${user?.name ?? ''}',
-                    style: const TextStyle(
-                        fontSize: 22,
-                        fontWeight: FontWeight.w800,
-                        color: SofiaColors.ink)),
+                Text(
+                  'Hola, ${user?.name ?? ''}',
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.w800,
+                    color: SofiaColors.ink,
+                  ),
+                ),
                 const SizedBox(height: 16),
 
                 // Clase en curso → pase de lista
@@ -141,22 +152,61 @@ class _TeacherHomeState extends State<TeacherHome> {
 
                 // Compositor tipo post
                 _composerBox(),
+                const SizedBox(height: 10),
+                InkWell(
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(builder: (_) => const MyTasksScreen()),
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: const Color(0xFFECEAE3)),
+                    ),
+                    child: Row(
+                      children: const [
+                        Icon(
+                          Icons.assignment_turned_in_outlined,
+                          color: SofiaColors.brand,
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Mis publicaciones y entregas',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: SofiaColors.ink,
+                            ),
+                          ),
+                        ),
+                        Icon(Icons.chevron_right, color: Color(0xFF9AA0AE)),
+                      ],
+                    ),
+                  ),
+                ),
                 const SizedBox(height: 20),
 
                 // Resumen de grupos
-                Text('Tus grupos (${groups.length})',
-                    style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.w700,
-                        letterSpacing: 1,
-                        color: Color(0xFF9AA0AE))),
+                Text(
+                  'Tus grupos (${groups.length})',
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w700,
+                    letterSpacing: 1,
+                    color: Color(0xFF9AA0AE),
+                  ),
+                ),
                 const SizedBox(height: 8),
                 if (groups.isEmpty)
                   const Padding(
                     padding: EdgeInsets.symmetric(vertical: 24),
                     child: Center(
-                      child: Text('Aún no tienes grupos asignados.',
-                          style: TextStyle(color: SofiaColors.soft)),
+                      child: Text(
+                        'Aún no tienes grupos asignados.',
+                        style: TextStyle(color: SofiaColors.soft),
+                      ),
                     ),
                   )
                 else
@@ -180,36 +230,50 @@ class _TeacherHomeState extends State<TeacherHome> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(children: [
-            Container(
+          Row(
+            children: [
+              Container(
                 width: 8,
                 height: 8,
                 decoration: const BoxDecoration(
-                    color: SofiaColors.gold, shape: BoxShape.circle)),
-            const SizedBox(width: 8),
-            const Text('CLASE EN CURSO',
+                  color: SofiaColors.gold,
+                  shape: BoxShape.circle,
+                ),
+              ),
+              const SizedBox(width: 8),
+              const Text(
+                'CLASE EN CURSO',
                 style: TextStyle(
-                    color: Colors.white70,
-                    fontSize: 11.5,
-                    fontWeight: FontWeight.w700,
-                    letterSpacing: 1)),
-          ]),
+                  color: Colors.white70,
+                  fontSize: 11.5,
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: 1,
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 10),
-          Text(s.subject,
-              style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 22,
-                  fontWeight: FontWeight.w800)),
+          Text(
+            s.subject,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 22,
+              fontWeight: FontWeight.w800,
+            ),
+          ),
           const SizedBox(height: 4),
-          Text('${s.group.name} · ${s.startTime}–${s.endTime}',
-              style: const TextStyle(color: Colors.white70, fontSize: 13)),
+          Text(
+            '${s.group.name} · ${s.startTime}–${s.endTime}',
+            style: const TextStyle(color: Colors.white70, fontSize: 13),
+          ),
           const SizedBox(height: 14),
           SizedBox(
             width: double.infinity,
             child: ElevatedButton.icon(
               style: ElevatedButton.styleFrom(
-                  backgroundColor: SofiaColors.gold,
-                  foregroundColor: SofiaColors.ink),
+                backgroundColor: SofiaColors.gold,
+                foregroundColor: SofiaColors.ink,
+              ),
               onPressed: () => _openAttendance(s),
               icon: const Icon(Icons.checklist),
               label: const Text('Pasar lista'),
@@ -240,8 +304,10 @@ class _TeacherHomeState extends State<TeacherHome> {
             ),
             const SizedBox(width: 12),
             const Expanded(
-              child: Text('¿Qué vas a asignar hoy?',
-                  style: TextStyle(color: SofiaColors.soft, fontSize: 15)),
+              child: Text(
+                '¿Qué vas a asignar hoy?',
+                style: TextStyle(color: SofiaColors.soft, fontSize: 15),
+              ),
             ),
             Icon(Icons.add_circle, color: SofiaColors.brand),
           ],
@@ -264,56 +330,83 @@ class _TeacherHomeState extends State<TeacherHome> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(children: [
-            Container(
-              width: 44,
-              height: 44,
-              alignment: Alignment.center,
-              decoration: BoxDecoration(
-                color: SofiaColors.brand.withValues(alpha: 0.10),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Text(g.name,
+          Row(
+            children: [
+              Container(
+                width: 44,
+                height: 44,
+                alignment: Alignment.center,
+                decoration: BoxDecoration(
+                  color: SofiaColors.brand.withValues(alpha: 0.10),
+                  borderRadius: BorderRadius.circular(12),
+                ),
+                child: Text(
+                  g.name,
                   style: const TextStyle(
-                      fontWeight: FontWeight.w800,
-                      color: SofiaColors.brand,
-                      fontSize: 13)),
-            ),
-            const SizedBox(width: 12),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text('Grupo ${g.name}',
-                      style: const TextStyle(
-                          fontWeight: FontWeight.w700,
-                          fontSize: 15,
-                          color: SofiaColors.ink)),
-                  Text('${g.studentCount} alumnos',
-                      style: const TextStyle(
-                          color: SofiaColors.soft, fontSize: 13)),
-                ],
+                    fontWeight: FontWeight.w800,
+                    color: SofiaColors.brand,
+                    fontSize: 13,
+                  ),
+                ),
               ),
-            ),
-          ]),
+              const SizedBox(width: 12),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      'Grupo ${g.name}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.w700,
+                        fontSize: 15,
+                        color: SofiaColors.ink,
+                      ),
+                    ),
+                    Text(
+                      '${g.studentCount} alumnos',
+                      style: const TextStyle(
+                        color: SofiaColors.soft,
+                        fontSize: 13,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
           const SizedBox(height: 10),
-          ...slots.map((s) => Padding(
+          ...slots.map(
+            (s) => InkWell(
+              onTap: () => _openAttendance(s), // ya existe este método
+              child: Padding(
                 padding: const EdgeInsets.only(top: 4),
                 child: Row(
                   children: [
-                    const Icon(Icons.schedule,
-                        size: 14, color: Color(0xFF9AA0AE)),
+                    const Icon(
+                      Icons.schedule,
+                      size: 14,
+                      color: Color(0xFF9AA0AE),
+                    ),
                     const SizedBox(width: 6),
                     Expanded(
                       child: Text(
                         '${s.subject} · ${dayNames[s.dayOfWeek] ?? ""} ${s.startTime}–${s.endTime}',
                         style: const TextStyle(
-                            fontSize: 12.5, color: SofiaColors.soft),
+                          fontSize: 12.5,
+                          color: SofiaColors.soft,
+                        ),
                       ),
+                    ),
+                    const Icon(
+                      Icons.chevron_right,
+                      size: 16,
+                      color: Color(0xFF9AA0AE),
                     ),
                   ],
                 ),
-              )),
+              ),
+            ),
+          ),
         ],
       ),
     );

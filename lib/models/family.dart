@@ -21,6 +21,11 @@ class FeedItem {
   final String createdAt; // ISO
   final String teacherName;
 
+  // Entrega del hijo (si el docente ya la registró/calificó).
+  final bool hasSubmission;
+  final bool delivered;
+  final double? grade;
+
   FeedItem({
     required this.id,
     required this.title,
@@ -29,15 +34,27 @@ class FeedItem {
     required this.dueDate,
     required this.createdAt,
     required this.teacherName,
+    required this.hasSubmission,
+    required this.delivered,
+    required this.grade,
   });
 
-  factory FeedItem.fromJson(Map<String, dynamic> json) => FeedItem(
-        id: json['id']?.toString() ?? '',
-        title: json['title']?.toString() ?? '',
-        description: json['description']?.toString(),
-        type: json['type']?.toString() ?? 'TAREA',
-        dueDate: json['dueDate']?.toString() ?? '',
-        createdAt: json['createdAt']?.toString() ?? '',
-        teacherName: (json['createdBy']?['name'])?.toString() ?? 'Docente',
-      );
+  factory FeedItem.fromJson(Map<String, dynamic> json) {
+    final sub = json['mySubmission'];
+    final hasSub = sub != null;
+    return FeedItem(
+      id: json['id']?.toString() ?? '',
+      title: json['title']?.toString() ?? '',
+      description: json['description']?.toString(),
+      type: json['type']?.toString() ?? 'TAREA',
+      dueDate: json['dueDate']?.toString() ?? '',
+      createdAt: json['createdAt']?.toString() ?? '',
+      teacherName: (json['createdBy']?['name'])?.toString() ?? 'Docente',
+      hasSubmission: hasSub,
+      delivered: hasSub && sub['delivered'] == true,
+      grade: hasSub && sub['grade'] != null
+          ? (sub['grade'] as num).toDouble()
+          : null,
+    );
+  }
 }

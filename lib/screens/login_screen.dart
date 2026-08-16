@@ -117,15 +117,18 @@ class _LoginScreenState extends State<LoginScreen> {
                           ? 'Ingresa tu contraseña'
                           : null,
                     ),
-                    if (_error != null) ...[
+                    if (_error != null && _error!.isNotEmpty) ...[
                       const SizedBox(height: 16),
                       Container(
+                        width: double.infinity,
                         padding: const EdgeInsets.all(12),
                         decoration: BoxDecoration(
-                          color: const Color(0xFFC6503B),
+                          color: const Color(0xFFF8E7E2),
                           borderRadius: BorderRadius.circular(10),
+                          border: Border.all(color: const Color(0xFFE0B4AA)),
                         ),
                         child: Row(
+                          crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
                             const Icon(
                               Icons.error_outline,
@@ -139,6 +142,7 @@ class _LoginScreenState extends State<LoginScreen> {
                                 style: const TextStyle(
                                   color: Color(0xFFC6503B),
                                   fontSize: 13.5,
+                                  fontWeight: FontWeight.w500,
                                 ),
                               ),
                             ),

@@ -32,7 +32,7 @@ class _SofiaAppState extends State<SofiaApp> {
     return ChangeNotifierProvider.value(
       value: widget.auth,
       child: MaterialApp.router(
-        title: 'SOFIA',
+        title: 'SOFIA', 
         debugShowCheckedModeBanner: false,
         theme: buildSofiaTheme(),
         routerConfig: _router,

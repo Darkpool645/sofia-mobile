@@ -1,6 +1,7 @@
 import 'package:go_router/go_router.dart';
 import 'package:sofia/screens/admin/groups_screen.dart';
 import 'package:sofia/screens/admin/parents_screen.dart';
+import 'package:sofia/screens/parent/parent_home.dart';
 import 'package:sofia/screens/teacher/teacher_home.dart';
 import '../providers/auth_provider.dart';
 import '../screens/login_screen.dart';
@@ -42,7 +43,7 @@ GoRouter buildRouter(AuthProvider auth) {
       GoRoute(path: '/login', builder: (_, __) => const LoginScreen()),
       GoRoute(path: '/admin', builder: (_, __) => const AdminHome()),
       GoRoute(path: '/profesor', builder: (_, __) => const TeacherHome()),
-      GoRoute(path: '/padre', builder: (_, __) => const PadreHome()),
+      GoRoute(path: '/padre', builder: (_, __) => const ParentHome()),
       GoRoute(path: '/admin/groups', builder: (_, __) => const GroupsScreen()),
       GoRoute(path: '/admin/teachers', builder: (_,__) => const TeachersScreen()),
       GoRoute(path: '/admin/parents', builder: (_, __) => const ParentsScreen()),

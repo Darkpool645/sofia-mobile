@@ -53,4 +53,8 @@ class ApiClient {
 
     throw ApiException(message, res.statusCode);
   }
+
+  Future<dynamic> patch(String path, Map<String, dynamic> body) => _send(() async =>
+      http.patch(Uri.parse('${ApiConfig.baseUrl}$path'),
+          headers: await _headers(), body: jsonEncode(body))); 
 }

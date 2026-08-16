@@ -6,27 +6,33 @@ int _asInt(dynamic v) {
 }
 
 class TeacherClass {
+  final String id; // id del ClassSlot (necesario para editar/diff)
   final String subject;
   final int dayOfWeek;
   final String startTime;
   final String endTime;
+  final String groupId;
   final String groupName;
 
   TeacherClass({
+    required this.id,
     required this.subject,
     required this.dayOfWeek,
     required this.startTime,
     required this.endTime,
+    required this.groupId,
     required this.groupName,
   });
 
   factory TeacherClass.fromJson(Map<String, dynamic> json) => TeacherClass(
-    subject: json['subject']?.toString() ?? '',
-    dayOfWeek: _asInt(json['dayOfWeek']),
-    startTime: json['startTime']?.toString() ?? '',
-    endTime: json['endTime']?.toString() ?? '',
-    groupName: (json['group']?['name'])?.toString() ?? '',
-  );
+        id: json['id']?.toString() ?? '',
+        subject: json['subject']?.toString() ?? '',
+        dayOfWeek: _asInt(json['dayOfWeek']),
+        startTime: json['startTime']?.toString() ?? '',
+        endTime: json['endTime']?.toString() ?? '',
+        groupId: (json['group']?['id'])?.toString() ?? '',
+        groupName: (json['group']?['name'])?.toString() ?? '',
+      );
 }
 
 class Teacher {
@@ -35,7 +41,7 @@ class Teacher {
   final String email;
   final List<TeacherClass> classes;
 
-  Teacher({ 
+  Teacher({
     required this.id,
     required this.name,
     required this.email,
@@ -43,13 +49,16 @@ class Teacher {
   });
 
   factory Teacher.fromJson(Map<String, dynamic> json) => Teacher(
-    id: json['id']?.toString() ?? '',
-    name: json['name']?.toString() ?? '',
-    email: json['email']?.toString() ?? '',
-    classes: ((json['classes'] as List)).map((e) => TeacherClass.fromJson(e as Map<String, dynamic>)).toList(),
-  );
+        id: json['id']?.toString() ?? '',
+        name: json['name']?.toString() ?? '',
+        email: json['email']?.toString() ?? '',
+        classes: ((json['classes'] as List?) ?? [])
+            .map((e) => TeacherClass.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      );
 }
 
+// Nombres de día compartidos (1 = lunes ... 7 = domingo).
 const dayNames = {
   1: 'Lunes',
   2: 'Martes',
@@ -57,5 +66,5 @@ const dayNames = {
   4: 'Jueves',
   5: 'Viernes',
   6: 'Sábado',
-  7: 'Domingo'
+  7: 'Domingo',
 };

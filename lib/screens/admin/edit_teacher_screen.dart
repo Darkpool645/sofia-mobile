@@ -6,8 +6,8 @@ import '../../services/teachers_service.dart';
 import '../../services/auth_service.dart';
 import '../../theme.dart';
 
-// ── Estructuras locales del formulario ───────────────────────────
 class _Block {
+  String? id; // id del ClassSlot (null = nuevo)
   int? day;
   TimeOfDay? start;
   TimeOfDay? end;
@@ -16,37 +16,24 @@ class _Block {
 class _Assignment {
   final String groupName;
   String subject = '';
-  List<_Block> blocks = [_Block()];
+  List<_Block> blocks = [];
   _Assignment(this.groupName);
 }
 
-class CreateTeacherScreen extends StatefulWidget {
-  const CreateTeacherScreen({super.key});
+class EditTeacherScreen extends StatefulWidget {
+  final String teacherId;
+  const EditTeacherScreen({super.key, required this.teacherId});
 
   @override
-  State<CreateTeacherScreen> createState() => _CreateTeacherScreenState();
+  State<EditTeacherScreen> createState() => _EditTeacherScreenState();
 }
 
-class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
+class _EditTeacherScreenState extends State<EditTeacherScreen> {
   final _groupsService = GroupsService();
   final _teachersService = TeachersService();
 
-  int _step = 0;
-
-  // Paso 1
-  final _formKey = GlobalKey<FormState>();
-  final _nameCtrl = TextEditingController();
-  final _emailCtrl = TextEditingController();
-  final _passCtrl = TextEditingController();
-
-  // Paso 2
-  List<Group>? _groups;
-  String? _groupsError;
-  String _query = '';
-  final Map<String, _Assignment> _selected = {}; // groupId -> asignación
-
-  String? _error;
-  bool _saving = false;
+  bool _loading = true;
+  String? _loadError;
   String? _clashError(List<Map<String, dynamic>> assignments) {
     final byDay = <int, List<Map<String, dynamic>>>{};
     for (final a in assignments) {
@@ -72,10 +59,23 @@ class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
     return null;
   }
 
+  int _step = 0;
+  final _formKey = GlobalKey<FormState>();
+  final _nameCtrl = TextEditingController();
+  final _emailCtrl = TextEditingController();
+  final _passCtrl = TextEditingController();
+
+  List<Group> _groups = [];
+  String _query = '';
+  final Map<String, _Assignment> _selected = {};
+
+  String? _error;
+  bool _saving = false;
+
   @override
   void initState() {
     super.initState();
-    _loadGroups();
+    _loadAll();
   }
 
   @override
@@ -86,16 +86,52 @@ class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
     super.dispose();
   }
 
-  Future<void> _loadGroups() async {
+  TimeOfDay? _parseTime(String hhmm) {
+    final parts = hhmm.split(':');
+    if (parts.length != 2) return null;
+    final h = int.tryParse(parts[0]);
+    final m = int.tryParse(parts[1]);
+    if (h == null || m == null) return null;
+    return TimeOfDay(hour: h, minute: m);
+  }
+
+  Future<void> _loadAll() async {
+    setState(() {
+      _loading = true;
+      _loadError = null;
+    });
     try {
       final groups = await _groupsService.getGroups();
-      setState(() => _groups = groups);
+      final teacher = await _teachersService.getTeacher(widget.teacherId);
+
+      _nameCtrl.text = teacher.name;
+      _emailCtrl.text = teacher.email;
+
+      // Agrupa las clases existentes por grupo, conservando el id de cada bloque.
+      _selected.clear();
+      for (final c in teacher.classes) {
+        final a = _selected.putIfAbsent(
+          c.groupId,
+          () => _Assignment(c.groupName)..subject = c.subject,
+        );
+        a.blocks.add(
+          _Block()
+            ..id = c.id
+            ..day = c.dayOfWeek
+            ..start = _parseTime(c.startTime)
+            ..end = _parseTime(c.endTime),
+        );
+      }
+
+      setState(() {
+        _groups = groups;
+        _loading = false;
+      });
     } catch (e) {
-      setState(
-        () => _groupsError = e is ApiException
-            ? e.message
-            : 'Error al cargar grupos',
-      );
+      setState(() {
+        _loadError = e is ApiException ? e.message : 'Error al cargar';
+        _loading = false;
+      });
     }
   }
 
@@ -105,9 +141,7 @@ class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
   int _mins(TimeOfDay t) => t.hour * 60 + t.minute;
 
   void _goToStep2() {
-    if (_formKey.currentState!.validate()) {
-      setState(() => _step = 1);
-    }
+    if (_formKey.currentState!.validate()) setState(() => _step = 1);
   }
 
   Future<void> _save() async {
@@ -135,13 +169,16 @@ class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
           );
           return;
         }
-        assignments.add({
+        final m = <String, dynamic>{
           'groupId': entry.key,
           'subject': a.subject.trim(),
           'dayOfWeek': b.day,
           'startTime': _fmt(b.start!),
           'endTime': _fmt(b.end!),
-        });
+        };
+        if (b.id != null)
+          m['id'] = b.id; // existente => update; sin id => create
+        assignments.add(m);
       }
     }
 
@@ -153,16 +190,17 @@ class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
 
     setState(() => _saving = true);
     try {
-      await _teachersService.createTeacher(
+      await _teachersService.updateTeacher(
+        id: widget.teacherId,
         name: _nameCtrl.text.trim(),
         email: _emailCtrl.text.trim(),
-        password: _passCtrl.text,
+        password: _passCtrl.text, // vacío => no cambia
         assignments: assignments,
       );
       if (mounted) Navigator.pop(context, true);
     } catch (e) {
       setState(
-        () => _error = e is ApiException ? e.message : 'No se pudo crear',
+        () => _error = e is ApiException ? e.message : 'No se pudo guardar',
       );
     } finally {
       if (mounted) setState(() => _saving = false);
@@ -171,10 +209,39 @@ class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
 
   @override
   Widget build(BuildContext context) {
+    if (_loading) {
+      return const Scaffold(body: Center(child: CircularProgressIndicator()));
+    }
+    if (_loadError != null) {
+      return Scaffold(
+        appBar: AppBar(title: const Text('Editar docente')),
+        body: Center(
+          child: Padding(
+            padding: const EdgeInsets.all(32),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  _loadError!,
+                  textAlign: TextAlign.center,
+                  style: const TextStyle(color: SofiaColors.soft),
+                ),
+                const SizedBox(height: 16),
+                OutlinedButton(
+                  onPressed: _loadAll,
+                  child: const Text('Reintentar'),
+                ),
+              ],
+            ),
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       appBar: AppBar(
         title: Text(
-          _step == 0 ? 'Nuevo docente · Datos' : 'Nuevo docente · Grupos',
+          _step == 0 ? 'Editar docente · Datos' : 'Editar docente · Grupos',
         ),
         backgroundColor: SofiaColors.paper,
         elevation: 0,
@@ -220,11 +287,7 @@ class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
                                   color: Colors.white,
                                 ),
                               )
-                            : Text(
-                                _selected.isEmpty
-                                    ? 'Guardar sin grupos'
-                                    : 'Guardar docente',
-                              ),
+                            : const Text('Guardar cambios'),
                       ),
                     ),
                   ],
@@ -234,7 +297,6 @@ class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
     );
   }
 
-  // ── PASO 1 ──────────────────────────────────────────────────
   Widget _buildStep1() {
     return Form(
       key: _formKey,
@@ -259,79 +321,45 @@ class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
           const SizedBox(height: 16),
           TextFormField(
             controller: _emailCtrl,
-            keyboardType: TextInputType.emailAddress,
-            decoration: const InputDecoration(labelText: 'Correo electrónico'),
-            validator: (v) {
-              if (v == null || v.trim().isEmpty) return 'Escribe el correo';
-              if (!v.contains('@')) return 'Correo no válido';
-              return null;
-            },
+            readOnly: true,
+            enabled: false,
+            decoration: const InputDecoration(
+              labelText: 'Correo electrónico',
+              helperText: 'El correo no se puede editar',
+            ),
           ),
           const SizedBox(height: 16),
           TextFormField(
             controller: _passCtrl,
             obscureText: true,
             decoration: const InputDecoration(
-              labelText: 'Contraseña',
-              helperText: 'Mínimo 6 caracteres',
+              labelText: 'Nueva contraseña (opcional)',
+              helperText: 'Déjalo vacío para no cambiarla',
             ),
-            validator: (v) =>
-                (v == null || v.length < 6) ? 'Mínimo 6 caracteres' : null,
+            validator: (v) {
+              if (v != null && v.isNotEmpty && v.length < 6) {
+                return 'Mínimo 6 caracteres';
+              }
+              return null;
+            },
           ),
         ],
       ),
     );
   }
 
-  // ── PASO 2 ──────────────────────────────────────────────────
   Widget _buildStep2() {
-    if (_groupsError != null) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.all(32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              const Icon(
-                Icons.error_outline,
-                color: SofiaColors.soft,
-                size: 44,
-              ),
-              const SizedBox(height: 12),
-              Text(
-                _groupsError!,
-                textAlign: TextAlign.center,
-                style: const TextStyle(color: SofiaColors.soft),
-              ),
-              const SizedBox(height: 16),
-              OutlinedButton(
-                onPressed: () {
-                  setState(() => _groupsError = null);
-                  _loadGroups();
-                },
-                child: const Text('Reintentar'),
-              ),
-            ],
-          ),
-        ),
-      );
-    }
-    if (_groups == null) {
-      return const Center(child: CircularProgressIndicator());
-    }
-
-    final filtered = _groups!
+    final filtered = _groups
         .where((g) => g.name.toLowerCase().contains(_query.toLowerCase()))
         .toList();
 
     return ListView(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 24),
       children: [
-        // Buscador
         TextField(
-          decoration: InputDecoration(
+          decoration: const InputDecoration(
             hintText: 'Buscar grupo…',
-            prefixIcon: const Icon(Icons.search),
+            prefixIcon: Icon(Icons.search),
             isDense: true,
           ),
           onChanged: (v) => setState(() => _query = v),
@@ -346,8 +374,6 @@ class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
           ),
         ),
         const SizedBox(height: 8),
-
-        // Lista de grupos con checkbox
         ...filtered.map((g) {
           final isSel = _selected.containsKey(g.id);
           return Card(
@@ -376,7 +402,7 @@ class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
               onChanged: (checked) {
                 setState(() {
                   if (checked == true) {
-                    _selected[g.id] = _Assignment(g.name);
+                    _selected[g.id] = _Assignment(g.name)..blocks.add(_Block());
                   } else {
                     _selected.remove(g.id);
                   }
@@ -385,7 +411,6 @@ class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
             ),
           );
         }),
-
         if (filtered.isEmpty)
           const Padding(
             padding: EdgeInsets.all(20),
@@ -396,8 +421,6 @@ class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
               ),
             ),
           ),
-
-        // Editores de horario por grupo seleccionado
         if (_selected.isNotEmpty) ...[
           const SizedBox(height: 8),
           const Divider(),
@@ -413,7 +436,6 @@ class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
           const SizedBox(height: 8),
           ..._selected.entries.map((e) => _buildGroupEditor(e.key, e.value)),
         ],
-
         if (_error != null)
           Padding(
             padding: const EdgeInsets.only(top: 12),
@@ -463,12 +485,12 @@ class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
               padding: const EdgeInsets.only(bottom: 8),
               child: Row(
                 children: [
-                  // Día
                   Expanded(
-                    flex: 3,
+                    flex: 4,
                     child: DropdownButtonFormField<int>(
                       initialValue: b.day,
                       isDense: true,
+                      isExpanded: true,
                       decoration: const InputDecoration(
                         labelText: 'Día',
                         isDense: true,
@@ -484,10 +506,9 @@ class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
                       onChanged: (v) => setState(() => b.day = v),
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  // Inicio
+                  const SizedBox(width: 6),
                   Expanded(
-                    flex: 2,
+                    flex: 3,
                     child: _TimeBox(
                       label: 'Inicio',
                       value: b.start,
@@ -501,10 +522,9 @@ class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
                       },
                     ),
                   ),
-                  const SizedBox(width: 8),
-                  // Fin
+                  const SizedBox(width: 6),
                   Expanded(
-                    flex: 2,
+                    flex: 3,
                     child: _TimeBox(
                       label: 'Fin',
                       value: b.end,
@@ -518,12 +538,17 @@ class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
                       },
                     ),
                   ),
-                  // Borrar bloque (si hay más de uno)
                   if (a.blocks.length > 1)
-                    IconButton(
-                      icon: const Icon(Icons.close, size: 18),
-                      color: const Color(0xFFC6503B),
-                      onPressed: () => setState(() => a.blocks.removeAt(index)),
+                    SizedBox(
+                      width: 32,
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        constraints: const BoxConstraints(),
+                        icon: const Icon(Icons.close, size: 18),
+                        color: const Color(0xFFC6503B),
+                        onPressed: () =>
+                            setState(() => a.blocks.removeAt(index)),
+                      ),
                     ),
                 ],
               ),

@@ -4,6 +4,7 @@ import '../../services/teachers_service.dart';
 import '../../services/auth_service.dart';
 import '../../theme.dart';
 import 'create_teacher_screen.dart';
+import 'edit_teacher_screen.dart';
 
 class TeachersScreen extends StatefulWidget {
   const TeachersScreen({super.key});
@@ -120,7 +121,27 @@ class _TeachersScreenState extends State<TeachersScreen> {
               padding: const EdgeInsets.fromLTRB(16, 16, 16, 90),
               itemCount: teachers.length,
               separatorBuilder: (_, __) => const SizedBox(height: 10),
-              itemBuilder: (_, i) => _TeacherCard(teacher: teachers[i]),
+              itemBuilder: (_, i) {
+  final teacher = teachers[i];
+  return InkWell(
+    borderRadius: BorderRadius.circular(14),
+    onTap: () async {
+      final updated = await Navigator.of(context).push<bool>(
+        MaterialPageRoute(
+          builder: (_) => EditTeacherScreen(teacherId: teacher.id),
+        ),
+      );
+      if (updated == true && mounted) {
+        await _reload();
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+              const SnackBar(content: Text('Docente actualizado')));
+        }
+      }
+    },
+    child: _TeacherCard(teacher: teacher),
+  );
+},
             ),
           );
         },

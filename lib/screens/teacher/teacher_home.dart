@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:sofia/screens/teacher/my_tasks_screen.dart';
+import 'package:sofia/screens/teacher/teacher_calendar_screen.dart';
 import '../../models/class_slot.dart';
 import '../../models/teacher.dart' show dayNames;
 import '../../services/portal_service.dart';
@@ -186,7 +187,42 @@ class _TeacherHomeState extends State<TeacherHome> {
                     ),
                   ),
                 ),
-                const SizedBox(height: 20),
+                const SizedBox(height: 10),
+                InkWell(
+                  onTap: () => Navigator.of(context).push(
+                    MaterialPageRoute(
+                      builder: (_) => const TeacherCalendarScreen(),
+                    ),
+                  ),
+                  borderRadius: BorderRadius.circular(14),
+                  child: Container(
+                    padding: const EdgeInsets.all(16),
+                    decoration: BoxDecoration(
+                      color: Colors.white,
+                      borderRadius: BorderRadius.circular(14),
+                      border: Border.all(color: const Color(0xFFECEAE3)),
+                    ),
+                    child: Row(
+                      children: const [
+                        Icon(
+                          Icons.calendar_month_outlined,
+                          color: SofiaColors.brand,
+                        ),
+                        SizedBox(width: 12),
+                        Expanded(
+                          child: Text(
+                            'Mi calendario',
+                            style: TextStyle(
+                              fontWeight: FontWeight.w600,
+                              color: SofiaColors.ink,
+                            ),
+                          ),
+                        ),
+                        Icon(Icons.chevron_right, color: Color(0xFF9AA0AE)),
+                      ],
+                    ),
+                  ),
+                ),
 
                 // Resumen de grupos
                 Text(

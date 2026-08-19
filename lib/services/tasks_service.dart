@@ -35,14 +35,31 @@ class TasksService {
   }
 
   Future<void> saveSubmissions(
-      String taskId, List<SubmissionStudent> students) async {
+    String taskId,
+    List<SubmissionStudent> students,
+  ) async {
     final records = students
-        .map((s) => {
-              'studentId': s.id,
-              'delivered': s.delivered,
-              if (s.gradeValue != null) 'grade': s.gradeValue,
-            })
+        .map(
+          (s) => {
+            'studentId': s.id,
+            'delivered': s.delivered,
+            if (s.gradeValue != null) 'grade': s.gradeValue,
+          },
+        )
         .toList();
     await _api.post('/tasks/$taskId/submissions', {'records': records});
+  }
+
+  Future<void> updateTask({
+    required String id,
+    required String title,
+    String? description,
+    required String dueDate, // "YYYY-MM-DD"
+  }) async {
+    await _api.patch('/tasks/$id', {
+      'title': title,
+      'description': description,
+      'dueDate': dueDate,
+    });
   }
 }

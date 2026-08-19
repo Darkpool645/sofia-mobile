@@ -26,7 +26,7 @@ class _CreateParentScreenState extends State<CreateParentScreen> {
   // Paso 1
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
-  final _emailCtrl = TextEditingController();
+  final _usernameCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
 
   // Paso 2
@@ -46,7 +46,7 @@ class _CreateParentScreenState extends State<CreateParentScreen> {
   @override
   void dispose() {
     _nameCtrl.dispose();
-    _emailCtrl.dispose();
+    _usernameCtrl.dispose();
     _passCtrl.dispose();
     super.dispose();
   }
@@ -87,7 +87,7 @@ class _CreateParentScreenState extends State<CreateParentScreen> {
     try {
       await _parentsService.createParent(
         name: _nameCtrl.text.trim(),
-        email: _emailCtrl.text.trim(),
+        username: _usernameCtrl.text.trim(),
         password: _passCtrl.text,
         children: children,
       );
@@ -174,7 +174,7 @@ class _CreateParentScreenState extends State<CreateParentScreen> {
           ),
           const SizedBox(height: 16),
           TextFormField(
-            controller: _emailCtrl,
+            controller: _usernameCtrl,
             keyboardType: TextInputType.emailAddress,
             decoration: const InputDecoration(labelText: 'Correo electrónico'),
             validator: (v) {

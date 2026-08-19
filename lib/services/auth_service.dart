@@ -13,14 +13,14 @@ class ApiException implements Exception {
 
 class AuthApi {
 
-  /// POST /api/auth/login -> { accessToken, user: { id, email, name, role } }
-  Future<Map<String, dynamic>> login(String email, String password) async {
+  /// POST /api/auth/login -> { accessToken, user: { id, username, name, role } }
+  Future<Map<String, dynamic>> login(String username, String password) async {
     final http.Response res;
     try {
       res = await http.post(
         Uri.parse('${ApiConfig.baseUrl}/auth/login'),
         headers: {'Content-Type': 'application/json' },
-        body: jsonEncode({ 'email': email, 'password': password }),
+        body: jsonEncode({ 'username': username, 'password': password }),
       )
       .timeout(const Duration(seconds: 20));
     } catch (_) {

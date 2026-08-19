@@ -11,13 +11,13 @@ class ParentsService {
 
   Future<void> createParent({
     required String name,
-    required String email,
+    required String username,
     required String password,
     required List<Map<String, dynamic>> children,
   }) async {
     await _api.post('/parents', {
       'name': name,
-      'email': email,
+      'username': username,
       'password': password,
       'children': children
     });

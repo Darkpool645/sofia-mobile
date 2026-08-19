@@ -20,13 +20,13 @@ class TeachersService {
   /// { groupId, subject, dayOfWeek, startTime, endTime }
   Future<void> createTeacher({
     required String name,
-    required String email,
+    required String username,
     required String password,
     required List<Map<String, dynamic>> assignments,
   }) async {
     await _api.post('/teachers', {
       'name': name,
-      'email': email,
+      'username': username,
       'password': password,
       'assignments': assignments,
     });
@@ -37,13 +37,13 @@ class TeachersService {
   Future<void> updateTeacher({
     required String id,
     required String name,
-    required String email,
+    required String username,
     String? password,
     required List<Map<String, dynamic>> assignments,
   }) async {
     final body = <String, dynamic>{
       'name': name,
-      'email': email,
+      'username': username,
       'assignments': assignments,
     };
     if (password != null && password.isNotEmpty) {

@@ -38,20 +38,20 @@ class TeacherClass {
 class Teacher {
   final String id;
   final String name;
-  final String email;
+  final String username;
   final List<TeacherClass> classes;
 
   Teacher({
     required this.id,
     required this.name,
-    required this.email,
+    required this.username,
     required this.classes,
   });
 
   factory Teacher.fromJson(Map<String, dynamic> json) => Teacher(
         id: json['id']?.toString() ?? '',
         name: json['name']?.toString() ?? '',
-        email: json['email']?.toString() ?? '',
+        username: json['username']?.toString() ?? '',
         classes: ((json['classes'] as List?) ?? [])
             .map((e) => TeacherClass.fromJson(e as Map<String, dynamic>))
             .toList(),

@@ -29,11 +29,11 @@ class AuthProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  Future<void> login(String email, String password) async {
+  Future<void> login(String username, String password) async {
     _loading = true;
     notifyListeners();
     try {
-      final data = await _api.login(email.trim(), password);
+      final data = await _api.login(username.trim(), password);
       _token = data['accessToken'] as String;
       _user = User.fromJson(data['user'] as Map<String, dynamic>);
 

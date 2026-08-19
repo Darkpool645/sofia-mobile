@@ -36,7 +36,7 @@ class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
   // Paso 1
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
-  final _emailCtrl = TextEditingController();
+  final _usernameCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
 
   // Paso 2
@@ -81,7 +81,7 @@ class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
   @override
   void dispose() {
     _nameCtrl.dispose();
-    _emailCtrl.dispose();
+    _usernameCtrl.dispose();
     _passCtrl.dispose();
     super.dispose();
   }
@@ -155,7 +155,7 @@ class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
     try {
       await _teachersService.createTeacher(
         name: _nameCtrl.text.trim(),
-        email: _emailCtrl.text.trim(),
+        username: _usernameCtrl.text.trim(),
         password: _passCtrl.text,
         assignments: assignments,
       );
@@ -258,7 +258,7 @@ class _CreateTeacherScreenState extends State<CreateTeacherScreen> {
           ),
           const SizedBox(height: 16),
           TextFormField(
-            controller: _emailCtrl,
+            controller: _usernameCtrl,
             keyboardType: TextInputType.emailAddress,
             decoration: const InputDecoration(labelText: 'Correo electrónico'),
             validator: (v) {

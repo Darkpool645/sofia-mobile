@@ -62,7 +62,7 @@ class _EditTeacherScreenState extends State<EditTeacherScreen> {
   int _step = 0;
   final _formKey = GlobalKey<FormState>();
   final _nameCtrl = TextEditingController();
-  final _emailCtrl = TextEditingController();
+  final _usernameCtrl = TextEditingController();
   final _passCtrl = TextEditingController();
 
   List<Group> _groups = [];
@@ -81,7 +81,7 @@ class _EditTeacherScreenState extends State<EditTeacherScreen> {
   @override
   void dispose() {
     _nameCtrl.dispose();
-    _emailCtrl.dispose();
+    _usernameCtrl.dispose();
     _passCtrl.dispose();
     super.dispose();
   }
@@ -105,7 +105,7 @@ class _EditTeacherScreenState extends State<EditTeacherScreen> {
       final teacher = await _teachersService.getTeacher(widget.teacherId);
 
       _nameCtrl.text = teacher.name;
-      _emailCtrl.text = teacher.email;
+      _usernameCtrl.text = teacher.username;
 
       // Agrupa las clases existentes por grupo, conservando el id de cada bloque.
       _selected.clear();
@@ -193,7 +193,7 @@ class _EditTeacherScreenState extends State<EditTeacherScreen> {
       await _teachersService.updateTeacher(
         id: widget.teacherId,
         name: _nameCtrl.text.trim(),
-        email: _emailCtrl.text.trim(),
+        username: _usernameCtrl.text.trim(),
         password: _passCtrl.text, // vacío => no cambia
         assignments: assignments,
       );
@@ -320,7 +320,7 @@ class _EditTeacherScreenState extends State<EditTeacherScreen> {
           ),
           const SizedBox(height: 16),
           TextFormField(
-            controller: _emailCtrl,
+            controller: _usernameCtrl,
             readOnly: true,
             enabled: false,
             decoration: const InputDecoration(

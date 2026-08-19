@@ -191,7 +191,7 @@ class _TeacherCard extends StatelessWidget {
                         fontSize: 15,
                         color: SofiaColors.ink)),
                 const SizedBox(height: 2),
-                Text(teacher.email,
+                Text(teacher.username,
                     style:
                         const TextStyle(color: SofiaColors.soft, fontSize: 13)),
                 const SizedBox(height: 4),

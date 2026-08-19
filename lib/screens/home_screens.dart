@@ -63,7 +63,7 @@ class _RoleHome extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            user?.email ?? '',
+            user?.username ?? '',
             style: const TextStyle(color: SofiaColors.soft),
           ),
           const SizedBox(height: 24),

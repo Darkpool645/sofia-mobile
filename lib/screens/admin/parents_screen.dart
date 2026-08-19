@@ -171,7 +171,7 @@ class _ParentCard extends StatelessWidget {
                         fontSize: 15,
                         color: SofiaColors.ink)),
                 const SizedBox(height: 2),
-                Text(parent.email,
+                Text(parent.username,
                     style:
                         const TextStyle(color: SofiaColors.soft, fontSize: 13)),
                 const SizedBox(height: 4),
